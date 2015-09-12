@@ -8,7 +8,7 @@
 #include "utilities.hh"
 
 template< class T>
-class Sender {
+class ConstantRateSender {
 	unsigned int sender_id;
 	T& next_hop;
 	TickNum avg_intersend_time;
@@ -17,7 +17,7 @@ class Sender {
 	unsigned int num_pkts_transmitted;
 
 public:
-	Sender(TickNum s_avg_intersend_time, T& s_next_hop, unsigned int s_sender_id)
+	ConstantRateSender(TickNum s_avg_intersend_time, T& s_next_hop, unsigned int s_sender_id)
 	:	sender_id(s_sender_id),
 		next_hop(s_next_hop),
 		avg_intersend_time(s_avg_intersend_time),

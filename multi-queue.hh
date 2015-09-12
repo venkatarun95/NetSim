@@ -42,6 +42,4 @@ public:
 	TickNum next_tick() const {return last_sent_tick + intersend_time;}
 };
 
-template class MultiQueue< PktLogger >;
-
 #endif

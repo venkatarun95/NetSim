@@ -112,5 +112,6 @@ void MultiQueue< T >::tick(TickNum tick_num) {
 	last_sent_tick = tick_num; // the opportunity was wasted
 }
 
-template void MultiQueue< PktLogger >::push_pkt(Packet& pkt, TickNum tick_num);
-template void MultiQueue< PktLogger >::tick(TickNum tick_num);
+// template void MultiQueue< PktLogger< CTCP< MarkovianCC, FifoQueue > > >::push_pkt(Packet& pkt, TickNum tick_num);
+// template void MultiQueue< PktLogger< CTCP< MarkovianCC, FifoQueue > > >::tick(TickNum tick_num);
+template class MultiQueue< PktLogger >;

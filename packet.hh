@@ -6,6 +6,7 @@
 class Packet {
 public:
 	unsigned int seq_num;
+	SenderId sender_id;
 	FlowId flow_id;
 	TickNum send_time;
 };
