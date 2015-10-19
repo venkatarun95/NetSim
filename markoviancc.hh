@@ -20,7 +20,7 @@ class MarkovianCC : public CCC {
 	// some adjustable parameters
 	const double alpha_rtt = 1.0/2.0;
 	const double alpha_intersend = 1.0/2.0;
-	const double alpha_update = 1.0/2.0;
+	const double alpha_update = 1.0;
 	const double initial_intersend_time = 10.0;
 	// set of all unacked pkts Format: (seq_num, sent_timestamp)
 	//
@@ -36,7 +36,7 @@ class MarkovianCC : public CCC {
 	TimeEwma rtt_acked_ewma;  // estimated using only acked packets
 	TimeEwma rtt_unacked_ewma; // unacked packets are also considered
 	TimeEwma intersend_ewma;
-	// send time of previous ack. Used to calculate intersend time
+	// send time of previous acked packet. Used to calculate intersend time
 	double prev_ack_sent_time;
 
 	// true when slow start is on

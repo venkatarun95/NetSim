@@ -20,8 +20,9 @@ int main() {
 	// queue.tick(6.5);
 	// queue.tick(8.5);
 
-	Network net(4, 1000);
-	net.run(7000);
+	Network net(4, 5000);
+	// Network net(4);
+	net.run(350000);
 
 	return 0;
 }

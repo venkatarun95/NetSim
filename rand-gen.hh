@@ -1,5 +1,5 @@
-#ifndef RAND_GEN
-#define RAND_GEN
+#ifndef RAND_GEN_HH
+#define RAND_GEN_HH
 
 #include <chrono>
 #include <random>
@@ -7,7 +7,6 @@
 class RandGen {
 	unsigned seed;
 	std::default_random_engine generator;
-	// std::exponential_distribution<double> distr_exp;
 
 public:
 	RandGen()

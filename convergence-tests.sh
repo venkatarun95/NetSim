@@ -14,7 +14,7 @@ while read p; do
         
         #i=`echo $p | awk -F '.'{print $5}`
         echo "v_$i <- read.csv(file='/tmp/Sender_$p', head=FALSE, sep=' ')" >> /tmp/r_script
-        echo "h_$i <- hist(v_$i\$V1, breaks=100)" >> /tmp/r_script
+        echo "h_$i <- hist(v_$i\$V1, breaks=0.01*(max(v_$i\$V1)-min(v_$i\$V1)))" >> /tmp/r_script
         i=$((i+1))
 done </tmp/unique_ports
 

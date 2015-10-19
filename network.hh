@@ -21,6 +21,7 @@ class Network {
 
 public:
 	Network(int num_senders, double time_unit);
+	// Network(int num_senders);
 	void run(TickNum run_duration);
 };
 
