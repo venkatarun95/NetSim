@@ -34,12 +34,13 @@ Network::Network(int num_senders __attribute((unused)), double time_unit)
 	pkt_logger(senders),
 	traffic_generator()//(1, 1, "")
 {
-	traffic_generator.push_back(TrafficGenerator(7*time_unit, 0*time_unit, "deterministic"));
-	traffic_generator.push_back(TrafficGenerator(5*time_unit, 1*time_unit, "deterministic"));
-	traffic_generator.push_back(TrafficGenerator(3*time_unit, 2*time_unit, "deterministic"));
-	traffic_generator.push_back(TrafficGenerator(1*time_unit, 3*time_unit, "deterministic"));
+	traffic_generator.push_back(TrafficGenerator(9*time_unit, 0*time_unit, "deterministic"));
+	traffic_generator.push_back(TrafficGenerator(7*time_unit, 1*time_unit, "deterministic"));
+	traffic_generator.push_back(TrafficGenerator(5*time_unit, 2*time_unit, "deterministic"));
+	traffic_generator.push_back(TrafficGenerator(3*time_unit, 3*time_unit, "deterministic"));
+	traffic_generator.push_back(TrafficGenerator(1*time_unit, 4*time_unit, "deterministic"));
 
-	for (int i = 0;i < 4;i++) {
+	for (int i = 0;i < 5;i++) {
 		senders.push_back(CTCPSender< MarkovianCC, FifoQueue< Delay< PktLogger > > >
 			(MarkovianCC(0.1), queue, i, traffic_generator[i]));
 	}

@@ -3,7 +3,7 @@ CXXFLAGS := -DHAVE_CONFIG_H -std=c++11 -pthread -pedantic -Wall -Wextra -Weffc++
 INCLUDES := 
 
 LIBS     := -ljemalloc -lm -pthread -lprotobuf -lpthread -ljemalloc -ludt
-OBJECTS  := simulator.o multi-queue.o network.o pkt-logger.o rand-gen.o traffic-generator.o
+OBJECTS  := simulator.o multi-queue.o network.o pkt-logger.o rand-gen.o traffic-generator.o update_function.o
 
 all: simulator
 

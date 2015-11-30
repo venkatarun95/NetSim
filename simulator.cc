@@ -22,7 +22,7 @@ int main() {
 
 	Network net(4, 5000);
 	// Network net(4);
-	net.run(350000);
+	net.run(45000);
 
 	return 0;
 }
