@@ -5,6 +5,7 @@
 #include "delay.hh"
 #include "fifo-queue.hh"
 #include "markoviancc.hh"
+#include "multidelta-queue.hh"
 #include "packet.hh"
 #include "utilities.hh"
 
@@ -13,7 +14,7 @@
 #include <vector>
 
 class PktLogger {
-	typedef CTCPSender< MarkovianCC, FifoQueue< Delay< PktLogger > > > SenderType;
+	typedef CTCPSender< MarkovianCC, MultiDeltaQueue< Delay< PktLogger > > > SenderType;
 
 	struct FlowStats {
 		TickNum flow_start_time; // for calculating average throughput
@@ -26,7 +27,7 @@ class PktLogger {
 
 	std::vector< SenderType >& senders;
 public:
-	PktLogger(std::vector< SenderType >& s_senders) 
+	PktLogger(std::vector< SenderType >& s_senders)
 	:	flow_stats(),
 		senders(s_senders)
 	{}

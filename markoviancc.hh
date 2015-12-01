@@ -1,5 +1,5 @@
 #ifndef MARKOVIANCC_HH
-#define MARKOVIANCC_HH 
+#define MARKOVIANCC_HH
 
 // to decide the source of timestamp
 #define SIMULATION_MODE
@@ -14,7 +14,7 @@
 #include "exponential.hh"
 #include "utilities.hh"
 
-class MarkovianCC : public CCC { 
+class MarkovianCC : public CCC {
 	double delta;
 
 	// some adjustable parameters
@@ -25,10 +25,10 @@ class MarkovianCC : public CCC {
 	// set of all unacked pkts Format: (seq_num, sent_timestamp)
 	//
 	// Note: a packet is assumed to be lost if a packet with a higher
-	// sequence number is acked. This set contains only the packets 
+	// sequence number is acked. This set contains only the packets
 	// which are NOT lost
 	std::map<int, double> unacknowledged_packets;
-	
+
 	double min_rtt;
 
 	TimeEwma mean_sending_rate;
@@ -67,8 +67,8 @@ class MarkovianCC : public CCC {
 	void do_slow_start();
 
 public:
-	MarkovianCC( double s_delta ) 
-	: 	CCC(), 
+	MarkovianCC( double s_delta )
+	: 	CCC(),
 		delta( s_delta ),
 		unacknowledged_packets(),
 		min_rtt(),
@@ -97,6 +97,8 @@ public:
 	#ifdef SIMULATION_MODE
 	void set_timestamp(double s_cur_tick) {cur_tick = s_cur_tick;}
 	#endif
+
+	int get_delta_class() { return (delta == 0.1)?0:1; }
 };
 
 #endif

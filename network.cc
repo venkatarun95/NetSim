@@ -27,7 +27,7 @@ using namespace std;
 
 Network::Network(int num_senders __attribute((unused)), double time_unit)
 :	senders(),
-	queue(1.0, delay),
+	queue(4, 1.0, delay),
 	delay(10, pkt_logger),
 	pkt_logger(senders),
 	traffic_generator()//(1, 1, "")
@@ -38,8 +38,11 @@ Network::Network(int num_senders __attribute((unused)), double time_unit)
 	traffic_generator.push_back(TrafficGenerator(1*time_unit, 3*time_unit, "deterministic"));
 
 	for (int i = 0;i < 4;i++) {
-		senders.push_back(CTCPSender< MarkovianCC, FifoQueue< Delay< PktLogger > > >\
-			(MarkovianCC(1), queue, i, traffic_generator[i]));
+		double delta = 0.1;
+		if (i < 2)
+			delta = 1;
+		senders.push_back(CTCPSender< MarkovianCC, MultiDeltaQueue< Delay< PktLogger > > >\
+			(MarkovianCC(delta), queue, i, traffic_generator[i]));
 	}
 }
 

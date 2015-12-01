@@ -2,6 +2,7 @@
 #include "delay.hh"
 #include "fifo-queue.hh"
 #include "markoviancc.hh"
+#include "multidelta-queue.hh"
 #include "multi-queue.hh"
 #include "pkt-logger.hh"
 #include "rand-gen.hh"
@@ -17,8 +18,8 @@ void CTCPSender<CCC, NextHop>::tick(TickNum tick_num) {
 
 	if (cur_state == false)
 		tick_num += 1e-4; 	// this is necessary because traffic generator may
-							// not detect the need to switch on because 
-							// floating point comparison may fail. We must 
+							// not detect the need to switch on because
+							// floating point comparison may fail. We must
 							// switch on nevertheless.
 	bool new_state = \
 	  traffic_generator.switch_state(num_pkts_transmitted, tick_num, sender_id);
@@ -42,7 +43,10 @@ void CTCPSender<CCC, NextHop>::tick(TickNum tick_num) {
 
 	if ((num_pkts_transmitted - num_pkts_acked) < congctrl.get_the_window() \
 		&& tick_num - last_sent_tick >= congctrl.get_intersend_time()) {
-		Packet pkt = {num_pkts_transmitted, sender_id, flow_id, tick_num};
+		Packet pkt = {num_pkts_transmitted, sender_id, flow_id, tick_num,
+			congctrl.get_delta_class()};
+		// TODO(venkat): This is a hacky method that assumes that congctrl
+		// is MarkovianCC. Fix this to a more modular method.
 		next_hop.push_pkt(pkt, tick_num);
 		++ num_pkts_transmitted;
 		last_sent_tick = tick_num;
@@ -86,3 +90,4 @@ void CTCPSender<CCC, NextHop>::push_pkt(Packet& pkt, TickNum tick_num) {
 
 template class CTCPSender< MarkovianCC, MultiQueue< PktLogger > >;
 template class CTCPSender< MarkovianCC, FifoQueue< Delay < PktLogger > > >;
+template class CTCPSender< MarkovianCC, MultiDeltaQueue< Delay < PktLogger > > >;
