@@ -52,6 +52,7 @@ void CTCPSender<CCC, NextHop>::tick(TickNum tick_num) {
 		last_sent_tick = tick_num;
 
 		congctrl.onPktSent(pkt.seq_num);
+		cerr << "0:0:" << tick_num << " " << 1.0/congctrl.get_intersend_time() << " " << sender_id << " >" << endl;
 	}
 	if (congctrl.get_intersend_time() <= 0) {
 		assert (false);
@@ -64,11 +65,6 @@ void CTCPSender<CCC, NextHop>::tick(TickNum tick_num) {
 				0.05*congctrl.get_intersend_time());
 	}
 
-	// static double tmp_last_log = 0;
-	// if (int(tmp_last_log) / 1000 < int(tick_num) / 1000) {
-	cerr << "0:0:" << tick_num << " " << 1.0/congctrl.get_intersend_time() << " " << sender_id << " >" << endl;
-		// tmp_last_log = tick_num;
-	// }
 	assert (next_tick_num != tick_num);
 }
 
