@@ -40,7 +40,6 @@ void CTCPSender<CCC, NextHop>::tick(TickNum tick_num) {
 		return;
 	}
 	assert (cur_state);
-
 	if ((num_pkts_transmitted - num_pkts_acked) < congctrl.get_the_window() \
 		&& tick_num - last_sent_tick >= congctrl.get_intersend_time()) {
 		Packet pkt = {num_pkts_transmitted, sender_id, flow_id, tick_num,

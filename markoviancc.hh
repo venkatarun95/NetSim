@@ -18,27 +18,43 @@
 class MarkovianCC : public CCC {
 	double delta;
 
-	// some adjustable parameters
-	const double alpha_rtt = 1.0/2.0;
-	const double alpha_intersend = 1.0/2.0; //1.0/2.0;
-	const double alpha_update = 1.0; //1.0/2.0;
-	const double initial_intersend_time = 10.0;
-	// set of all unacked pkts Format: (seq_num, sent_timestamp)
+	// Some adjustable parameters
+
+	static constexpr double alpha_rtt = 1.0/2.0;
+	static constexpr double initial_intersend_time = 10.0;
+	// Oscillator parameters
+	static constexpr double spring_k = 1.0;
+	static constexpr double damping = 2.0;
+	static constexpr double mass = 1.0;
+
+	struct PktInformation {
+		// To store data about the time the acket was sent
+		double sending_rate;
+		double sending_rate_velocity;
+		double sent_time;
+	};
+
+	// Set of all unacked pkts Format: (seq_num, sent_timestamp)
 	//
 	// Note: a packet is assumed to be lost if a packet with a higher
 	// sequence number is acked. This set contains only the packets
-	// which are NOT lost
-	std::map<int, double, std::function<bool(const int&, const int&)> > unacknowledged_packets;
+	// which are NOT lost. This condition is currently under revision.
+	std::map<int, PktInformation, std::function<bool(const int&, const int&)> >
+		unacknowledged_packets;
+
+	// MarkovianCC state variables
 
 	double min_rtt;
-
-	TimeEwma mean_sending_rate;
-
-	TimeEwma rtt_acked_ewma;  // estimated using only acked packets
-	TimeEwma rtt_unacked_ewma; // unacked packets are also considered
-	TimeEwma intersend_ewma;
-	// send time of previous ack. Used to calculate intersend time
-	double prev_ack_sent_time;
+	// Estimated using only acked packets
+	double rtt_acked_ewma;
+	// Unacked packets are also considered
+	double rtt_unacked_ewma;
+	// For calculating dt in oscillator simulation. To be updated WITHIN
+	// update_sending_rate
+	double prev_ack_timestamp;
+	double sending_rate;
+	// First order rate of change of sending rate.
+	double sending_rate_velocity;
 
 	// cur_tick is measured relative to this
 	std::chrono::high_resolution_clock::time_point start_time_point;
@@ -47,13 +63,6 @@ class MarkovianCC : public CCC {
 	unsigned int num_pkts_lost;
 	// to calculate % lost pkts
 	unsigned int num_pkts_acked;
-
-	// Variables for expressing explicit utility functions
-
-	const std::vector<double> delta_classes = {0.1, 0.2, 0.5, 1, 2, 3, 4, 6, 8};
-	int cur_delta_class;
-	// Last time the delta was updated
-	int last_delta_update_time;
 
 	#ifdef SIMULATION_MODE
 	// current time to be used during simulation
@@ -64,27 +73,22 @@ class MarkovianCC : public CCC {
 	double current_timestamp();
 
 	// update intersend time based on rtt ewma and intersend ewma
-	void update_intersend_time();
-
-	// Update the delta to express explicit utility functions
-	void update_delta();
+	void update_sending_rate(const PktInformation& pkt_info);
 
 public:
 	MarkovianCC( double s_delta )
 	: 	CCC(),
 		delta( s_delta ),
-		unacknowledged_packets([](const int& x, const int& y){return x > y;}),
+		unacknowledged_packets([](const int& x, const int& y){return x < y;}),
 		min_rtt(),
-		mean_sending_rate(alpha_update),
-		rtt_acked_ewma(alpha_rtt),
-		rtt_unacked_ewma(alpha_rtt),
-		intersend_ewma(alpha_intersend),
-		prev_ack_sent_time(),
+		rtt_acked_ewma(),
+		rtt_unacked_ewma(),
+		prev_ack_timestamp(),
+		sending_rate(),
+		sending_rate_velocity(0),
 		start_time_point(),
 		num_pkts_lost(),
 		num_pkts_acked(),
-		cur_delta_class(0),
-		last_delta_update_time(0),
 		#ifdef SIMULATION_MODE
 		cur_tick()
 		#endif
