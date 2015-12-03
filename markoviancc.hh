@@ -20,12 +20,14 @@ class MarkovianCC : public CCC {
 
 	// Some adjustable parameters
 
-	static constexpr double alpha_rtt = 1.0/2.0;
+	static constexpr double alpha_rtt = 1.0;
 	static constexpr double initial_intersend_time = 10.0;
 	// Oscillator parameters
 	static constexpr double spring_k = 1.0;
 	static constexpr double damping = 2.0;
 	static constexpr double mass = 1.0;
+	// The \Delta t used for updating position and velocity
+	static constexpr double dt = 0.01;
 
 	struct PktInformation {
 		// To store data about the time the acket was sent
@@ -49,9 +51,6 @@ class MarkovianCC : public CCC {
 	double rtt_acked_ewma;
 	// Unacked packets are also considered
 	double rtt_unacked_ewma;
-	// For calculating dt in oscillator simulation. To be updated WITHIN
-	// update_sending_rate
-	double prev_ack_timestamp;
 	double sending_rate;
 	// First order rate of change of sending rate.
 	double sending_rate_velocity;
@@ -83,7 +82,6 @@ public:
 		min_rtt(),
 		rtt_acked_ewma(),
 		rtt_unacked_ewma(),
-		prev_ack_timestamp(),
 		sending_rate(),
 		sending_rate_velocity(0),
 		start_time_point(),

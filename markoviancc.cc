@@ -34,7 +34,6 @@ void MarkovianCC::init() {
  	_intersend_time = initial_intersend_time;
 	sending_rate = 1.0 / initial_intersend_time;
 	sending_rate_velocity = 0.0;
-	prev_ack_timestamp = 0.0;
 
 	_the_window = numeric_limits<double>::max();
 	_timeout = 1000;
@@ -50,28 +49,33 @@ void MarkovianCC::update_sending_rate(const PktInformation& pkt_info) {
 	double rtt_ewma = max(rtt_unacked_ewma, rtt_acked_ewma);
 
 	double spare_rate = 1.0 / (rtt_ewma - min_rtt);
+	assert(spare_rate > 0);
 
 	// to avoid bursts due to incorrect min_rtt estimate
 	if (num_pkts_acked < 10) {
-		// 	sending_rate = max(min(spare_rate / delta, sending_rate), 0.0);
-		// _intersend_time = 1.0 / sending_rate;
-	 	return;
+		return;
 	}
+	else if (num_pkts_acked < 20)
+		sending_rate = spare_rate / delta;
 
 	double force = spring_k * (spare_rate / delta - pkt_info.sending_rate);
 	force -= damping * pkt_info.sending_rate_velocity;
-	const double dt = cur_time - prev_ack_timestamp;
-	prev_ack_timestamp = cur_time;
-	cout << sending_rate << " " << sending_rate_velocity << " " << dt << " " << spare_rate << " " << pkt_info.sending_rate << endl;
 	sending_rate += pkt_info.sending_rate_velocity * dt;
-	sending_rate_velocity = pkt_info.sending_rate_velocity + force / mass * dt;
-	sending_rate_velocity = min(sending_rate / dt, sending_rate_velocity);
+	sending_rate_velocity = pkt_info.sending_rate_velocity + force * dt / mass;
+	// sending_rate_velocity = min(sending_rate / dt, sending_rate_velocity);
+	if (sending_rate > spare_rate / delta) {
+		sending_rate = spare_rate / delta;
+		sending_rate_velocity = 0.0;
+	}
+
+	cout << "B " << cur_time << " " << spare_rate/delta << " " << force << " " << sending_rate << " " << sending_rate_velocity * dt << endl;
 
 	assert(dt > 0);
 
 	if (sending_rate < 1.0 / initial_intersend_time)
 		sending_rate = 1.0 / initial_intersend_time;
 
+	// _intersend_time = rand_gen.exponential(1.0 / sending_rate);
 	_intersend_time = 1.0 / sending_rate;
 	assert(_intersend_time > 0);
 }
@@ -86,7 +90,13 @@ void MarkovianCC::onACK(int ack, double receiver_timestamp __attribute((unused))
 		std::cout<<"Unknown Ack!! "<<seq_num<<std::endl; return; }
 
 	const PktInformation& pkt_info = unacknowledged_packets[seq_num];
+	// cout << "PktInfo " << pkt_info.sending_rate << " " << pkt_info.sending_rate_velocity << " " << pkt_info.sent_time << " " << seq_num << endl;
 	const double cur_time = current_timestamp();
+
+	if (min_rtt > numeric_limits<double>::max() / 2) { // if this is the first ack
+		rtt_acked_ewma = cur_time - pkt_info.sent_time;
+		cout << "Initializing rtt_acked_ewma" << endl;
+	}
 
 	min_rtt = min(min_rtt, cur_time - pkt_info.sent_time);
 
@@ -126,9 +136,11 @@ void MarkovianCC::onLinkRateMeasurement( double s_measured_link_rate __attribute
 }
 
 void MarkovianCC::onPktSent(int seq_num) {
-	// add to list of unacknowledged packets
 	assert( unacknowledged_packets.count( seq_num ) == 0 );
 	double cur_time = current_timestamp();
+	// sending_rate += sending_rate_velocity * dt;
+
+	// add to list of unacknowledged packets
 	unacknowledged_packets[seq_num] = {
 		sending_rate,
 		sending_rate_velocity,
