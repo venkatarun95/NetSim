@@ -6,9 +6,14 @@ gnuplot_script="plot "
 i=1
 echo "" > /tmp/r_script
 while read p; do
+        # Prints the sending rate as indicated by sender
         grep $p\ \> convergence-test-tcpdump-ascii | \
-                awk '{print $1}' | \
-                awk -F ':' 'BEGIN{prev=0}{if($3==prev)print $2*60+$3, 0; else print $2*60+$3, 1/($3-prev); prev=$2*60+$3}' > /tmp/Sender_$p
+                awk '{print $1, ":", $2}' | \
+                awk -F ':' 'BEGIN{prev=0}{print $2*60+$3, $4; prev=$2*60+$3}' > /tmp/Sender_$p
+        # Prints sending rate as inferred from timestamps
+        # grep $p\ \> convergence-test-tcpdump-ascii | \
+                # awk '{print $1}' | \
+                # awk -F ':' 'BEGIN{prev=0}{if($3==prev)print $2*60+$3, 0; else print $2*60+$3, 1/($3-prev); prev=$2*60+$3}' > /tmp/Sender_$p
         echo "Sender_$p"
         gnuplot_script="$gnuplot_script \"/tmp/Sender_$p\" using 1:2, "
 

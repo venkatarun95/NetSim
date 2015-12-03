@@ -4,6 +4,7 @@
 #include "packet.hh"
 #include "utilities.hh"
 
+#include <iostream>
 #include <limits>
 #include <queue>
 #include <tuple>
@@ -23,7 +24,9 @@ public:
 	{}
 
 	void push_pkt(Packet& pkt, TickNum tick_num) {
-		assert( tick_num >= pkts.front().second);
+		if (!pkts.empty() && tick_num < pkts.front().second)
+			std::cout << "lkadfy " << tick_num << " " << pkts.front().second << std::endl << std::flush;
+		assert( pkts.empty() || tick_num >= pkts.front().second);
 		pkts.push(std::make_pair(pkt, tick_num));
 	}
 
